@@ -13,6 +13,11 @@ Build with
 make
 ```
 
+To make the regression tests run
+```
+$ make installcheck
+```
+
 Install with
 ```
 $ sudo make install

@@ -1,0 +1,30 @@
+CREATE EXTENSION IF NOT EXISTS check_digits;
+-- should be true
+select check_digits_inn('500100732259');
+ check_digits_inn 
+------------------
+ t
+(1 row)
+
+select check_digits_inn('7830002293');
+ check_digits_inn 
+------------------
+ t
+(1 row)
+
+-- should be false
+select check_digits_inn('500100732258');
+ check_digits_inn 
+------------------
+ f
+(1 row)
+
+-- should fail with error
+-- by length
+select check_digits_inn('5001007322581240');
+ERROR:  INN must contain 10 or 12 digits
+select check_digits_inn('40683635');
+ERROR:  INN must contain 10 or 12 digits
+-- by wrong characters
+select check_digits_inn('r00100732259');
+ERROR:  invalid symbol "r"
