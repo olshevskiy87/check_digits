@@ -24,4 +24,5 @@ $$ CREATE EXTENSION check_digits;
 ```
 
 ## LICENSE
-Copyright (c) 2015 Dmitriy Olshevskiy. MIT LICENSE. See LICENSE.md for details.
+Copyright (c) 2015 - 2016 Dmitriy Olshevskiy. MIT LICENSE.
+See LICENSE.md for details.
