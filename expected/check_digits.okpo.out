@@ -1,0 +1,31 @@
+CREATE EXTENSION IF NOT EXISTS check_digits;
+NOTICE:  extension "check_digits" already exists, skipping
+-- should be true
+select check_digits_okpo('47296611');
+ check_digits_okpo 
+-------------------
+ t
+(1 row)
+
+select check_digits_okpo('0154489581');
+ check_digits_okpo 
+-------------------
+ t
+(1 row)
+
+-- should be false
+select check_digits_okpo('0193273379');
+ check_digits_okpo 
+-------------------
+ f
+(1 row)
+
+-- should fail with error
+-- by length
+select check_digits_okpo('1000073254140');
+ERROR:  OKPO must contain 8 or 10 digits
+select check_digits_okpo('308363');
+ERROR:  OKPO must contain 8 or 10 digits
+-- by wrong characters
+select check_digits_okpo('01G4489S81');
+ERROR:  invalid symbol "G"

@@ -1,10 +1,16 @@
-# check_digits
+check_digits
+============
+
 Functions to check various identification numbers.
 
 ### Functions:
-* check_digits_inn(inn text)
+* `check_digits_inn(inn text)`
 
-Checks russian Individual Taxpayer Number ([INN](https://www.nalog.ru/eng/exchinf/inn/))
+Checks russian Individual Taxpayer Number ([INN](https://goo.gl/dK7BZs))
+
+* `check_digits_okpo(okpo text)`
+
+Checks All-Russian Classifier of Enterprises and Organizations ([OKPO](https://goo.gl/gWldnP))
 
 ## INSTALLATION
 ### Setup
