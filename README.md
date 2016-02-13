@@ -1,9 +1,11 @@
-check_digits
+check digits
 ============
 
 Functions to check various identification numbers.
 
-### Functions:
+Functions
+---------
+
 * `check_digits_inn(inn text)`
 
 Checks russian Individual Taxpayer Number ([INN](https://goo.gl/dK7BZs))
@@ -12,11 +14,12 @@ Checks russian Individual Taxpayer Number ([INN](https://goo.gl/dK7BZs))
 
 Checks All-Russian Classifier of Enterprises and Organizations ([OKPO](https://goo.gl/gWldnP))
 
-## INSTALLATION
-### Setup
+Installation
+------------
+
 Build with
 ```
-make
+$ make
 ```
 
 To make the regression tests run
@@ -34,6 +37,8 @@ At last to create the extension type in psql
 $$ CREATE EXTENSION check_digits;
 ```
 
-## LICENSE
+License
+-------
+
 Copyright (c) 2015 - 2016 Dmitriy Olshevskiy. MIT LICENSE.
 See LICENSE.md for details.
