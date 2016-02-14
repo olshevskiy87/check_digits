@@ -16,6 +16,7 @@ PG_MODULE_MAGIC;
 
 PG_FUNCTION_INFO_V1(check_digits_inn);
 PG_FUNCTION_INFO_V1(check_digits_okpo);
+PG_FUNCTION_INFO_V1(check_digits_ogrn);
 
 char *
 check_array_of_digits(char* arr, uint8_t len)
@@ -182,4 +183,60 @@ check_digits_okpo(PG_FUNCTION_ARGS)
     }
 
     PG_RETURN_BOOL((i_okpo[penult_index] == rest));
+}
+
+/*
+ * Check Primary State Registration Number (rus. OGRN)
+ *
+ * Returns true if the argument is a correct OGRN number.
+ * Otherwise, returns false.
+ */
+Datum
+check_digits_ogrn(PG_FUNCTION_ARGS)
+{
+    unsigned long long  ogrn_num;   // ogrn number without last digit
+    text       *ogrn;
+    char       *c_ogrn;
+    char       *err_ret;
+    uint8_t     len, last_digit;
+    uint16_t    rest;
+
+    if (PG_ARGISNULL(0)) {
+        PG_RETURN_NULL();
+    }
+
+    ogrn = PG_GETARG_TEXT_P(0);
+    len = VARSIZE(ogrn) - VARHDRSZ;
+    elog(DEBUG1, "check_digits_ogrn: length [%d]", len);
+
+    if (len != 13 && len != 15) {
+        ereport(ERROR,
+                (errcode(ERRCODE_STRING_DATA_LENGTH_MISMATCH),
+                 errmsg("OGRN must contain 13 or 15 digits")));
+    }
+    c_ogrn = text_to_cstring(ogrn);
+
+    err_ret = check_array_of_digits(c_ogrn, len);
+    if (strlen(err_ret)) {
+        ereport(ERROR,
+                (errcode(ERRCODE_DATA_EXCEPTION),
+                 errmsg("%s", err_ret)));
+    }
+
+    last_digit = c_ogrn[len - 1] - '0';
+    elog(DEBUG1, "check_digits_ogrn: last digit [%d]", last_digit);
+
+    c_ogrn[len - 1] = '\0';    // remove last digit before cast to LL
+    sscanf(c_ogrn, "%lld", &ogrn_num);
+    elog(DEBUG1, "check_digits_ogrn: ogrn num [%lld]", ogrn_num);
+
+    pfree(c_ogrn);
+
+    rest = ogrn_num % (len - 2);
+    if (rest > 9) {
+        rest = rest % 10;
+    }
+    elog(DEBUG1, "check_digits_ogrn: rest [%d]", rest);
+
+    PG_RETURN_BOOL((last_digit == rest));
 }

@@ -14,6 +14,10 @@ Checks russian Individual Taxpayer Number ([INN](https://goo.gl/dK7BZs))
 
 Checks All-Russian Classifier of Enterprises and Organizations ([OKPO](https://goo.gl/gWldnP))
 
+* `check_digits_ogrn(ogrn text)`
+
+Check Primary State Registration Number ([OGRN](https://goo.gl/Abd9oc))
+
 Installation
 ------------
 
