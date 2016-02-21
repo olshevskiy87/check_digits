@@ -18,6 +18,10 @@ Checks All-Russian Classifier of Enterprises and Organizations ([OKPO](https://g
 
 Check Primary State Registration Number ([OGRN](https://goo.gl/Abd9oc))
 
+* `check_digits_snils(snils text)`
+
+Check Insurance Number of Individual Ledger Account ([SNILS](https://goo.gl/NxeFKV))
+
 Installation
 ------------
 

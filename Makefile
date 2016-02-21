@@ -8,7 +8,8 @@ PGFILEDESC = "check_digits - functions to check various identification numbers"
 
 REGRESS = check_digits.inn \
           check_digits.okpo \
-          check_digits.ogrn
+          check_digits.ogrn \
+          check_digits.snils
 
 PG_CONFIG = pg_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)

@@ -17,12 +17,13 @@ PG_MODULE_MAGIC;
 PG_FUNCTION_INFO_V1(check_digits_inn);
 PG_FUNCTION_INFO_V1(check_digits_okpo);
 PG_FUNCTION_INFO_V1(check_digits_ogrn);
+PG_FUNCTION_INFO_V1(check_digits_snils);
 
 char *
 check_array_of_digits(char* arr, uint8_t len)
 {
-    uint8_t     i;
-    char       *ret = (char *) calloc(25, sizeof(char));
+    uint8_t  i;
+    char    *ret = (char *) calloc(25, sizeof(char));
 
     if (len == 0) {
         return "zero length";
@@ -47,10 +48,8 @@ Datum
 check_digits_inn(PG_FUNCTION_ARGS)
 {
     text       *inn;
-    uint8_t     inn_len, i;
-    char       *c_inn;
-    char       *err_ret;
-    uint8_t     i_inn[12];
+    uint8_t     inn_len, i, i_inn[12];
+    char       *c_inn, *err_ret;
     bool        is_correct = false;
     uint16_t    mul_sum, rest;
 
@@ -136,8 +135,7 @@ Datum
 check_digits_okpo(PG_FUNCTION_ARGS)
 {
     text       *okpo;
-    char       *c_okpo;
-    char       *err_ret;
+    char       *c_okpo, *err_ret;
     uint8_t     okpo_len, i, penult_index;
     uint8_t     i_okpo[10];
     uint16_t    mul_sum = 0, rest;
@@ -196,8 +194,7 @@ check_digits_ogrn(PG_FUNCTION_ARGS)
 {
     unsigned long long  ogrn_num;   // ogrn number without last digit
     text       *ogrn;
-    char       *c_ogrn;
-    char       *err_ret;
+    char       *c_ogrn, *err_ret;
     uint8_t     len, last_digit;
     uint16_t    rest;
 
@@ -239,4 +236,81 @@ check_digits_ogrn(PG_FUNCTION_ARGS)
     elog(DEBUG1, "check_digits_ogrn: rest [%d]", rest);
 
     PG_RETURN_BOOL((last_digit == rest));
+}
+
+/*
+ * Check Insurance Number of Individual Ledger Account (rus. SNILS)
+ */
+Datum
+check_digits_snils(PG_FUNCTION_ARGS)
+{
+
+#define SNILS_MIN_VALUE 1001998
+
+    unsigned long long  snils_num;
+    text    *p_snils;
+    char    *c_snils, *snils;
+    uint8_t  len, new_len, i, weight, ch_num;
+    uint16_t mul_sum = 0, rest;
+    int      i_snils[11];
+
+    if (PG_ARGISNULL(0)) {
+        PG_RETURN_NULL();
+    }
+
+    p_snils = PG_GETARG_TEXT_P(0);
+    len = VARSIZE(p_snils) - VARHDRSZ;
+
+    snils = (char *) calloc(len, sizeof(char));
+
+    c_snils = text_to_cstring(p_snils);
+    pfree(p_snils);
+    new_len = 0;
+    for (i = 0; i < len; i++) {
+        if (!isdigit(c_snils[i])) {
+            continue;
+        }
+        snils[new_len] = c_snils[i];
+        new_len++;
+    }
+    if (new_len != 11) {
+        ereport(ERROR,
+                (errcode(ERRCODE_STRING_DATA_LENGTH_MISMATCH),
+                 errmsg("SNILS must contain 11 digits")));
+    }
+
+    sscanf(snils, "%lld", &snils_num);
+    elog(DEBUG1, "check_digits_snils: snils num [%lld]", snils_num);
+
+    if (snils_num <= SNILS_MIN_VALUE) {
+        ereport(ERROR,
+                (errcode(ERRCODE_DATA_EXCEPTION),
+                 errmsg("SNILS must be more than %d", SNILS_MIN_VALUE)));
+    }
+
+    for (i = 0; i < new_len; i++) {
+        i_snils[i] = snils[i] - '0';
+    }
+    free(snils);
+
+    ch_num = i_snils[new_len - 2] * 10 + i_snils[new_len - 1];
+    elog(DEBUG1, "check_digits_snils: check num [%d]", ch_num);
+
+    for (weight = 9, i = 0; weight > 0; weight--) {
+        mul_sum += i_snils[i++] * weight;
+    }
+    elog(DEBUG1, "check_digits_snils: mul_sum [%d]", mul_sum);
+
+    rest = mul_sum;
+    if (rest == 100 || rest == 101) {
+        rest = 0;
+    } else if (rest > 101) {
+        rest = mul_sum % 101;
+        if (rest == 100 || rest == 101) {
+            rest = 0;
+        }
+    }
+    elog(DEBUG1, "check_digits_snils: rest [%d]", rest);
+
+    PG_RETURN_BOOL((rest == ch_num));
 }

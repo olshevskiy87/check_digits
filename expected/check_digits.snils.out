@@ -1,0 +1,34 @@
+CREATE EXTENSION IF NOT EXISTS check_digits;
+NOTICE:  extension "check_digits" already exists, skipping
+-- should be true
+select check_digits_snils('11223344595');
+ check_digits_snils 
+--------------------
+ t
+(1 row)
+
+select check_digits_snils('086-754-303 00');
+ check_digits_snils 
+--------------------
+ t
+(1 row)
+
+-- should be false
+select check_digits_snils('11323344595');
+ check_digits_snils 
+--------------------
+ f
+(1 row)
+
+select check_digits_snils('921-182-904 18');
+ check_digits_snils 
+--------------------
+ f
+(1 row)
+
+-- should fail with error
+-- by length
+select check_digits_snils('1122334459505');
+ERROR:  SNILS must contain 11 digits
+select check_digits_snils('21-182-904 18');
+ERROR:  SNILS must contain 11 digits
