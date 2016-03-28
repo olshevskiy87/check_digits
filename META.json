@@ -3,7 +3,7 @@
     "abstract": "Functions to check various identification numbers",
     "version": "0.3.0",
     "maintainer": "Dmitriy Olshevskiy <olshevskiy87@bk.ru>",
-    "license": "MIT",
+    "license": "mit",
     "release_status": "testing",
     "tags": [
         "check",
@@ -11,6 +11,14 @@
         "identification",
         "number"
     ],
+    "provides": {
+        "check_digits": {
+            "file": "sql/check_digits--0.3.0.sql",
+            "docfile": "Readme.md",
+            "version": "0.3.0",
+            "abstract": "Functions to check various identification numbers"
+        }
+    },
     "resources": {
         "repository": {
             "url": "git://github.com/olshevskiy87/check_digits.git",
