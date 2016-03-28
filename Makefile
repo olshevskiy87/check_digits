@@ -4,7 +4,7 @@ MODULE_big = check_digits
 EXTENSION = check_digits
 OBJS = check_digits.o
 DATA = check_digits--1.0.sql
-PGFILEDESC = "check_digits - functions to check various identification numbers"
+PGFILEDESC = "functions to check various identification numbers"
 
 REGRESS = check_digits.inn \
           check_digits.okpo \
