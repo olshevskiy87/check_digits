@@ -1,6 +1,7 @@
 *.o
 *.so
 *.swp
+*.zip
 /results
 /regression.diffs
 /regression.out

@@ -1,0 +1,26 @@
+{
+    "name": "check_digits",
+    "abstract": "Functions to check various identification numbers",
+    "version": "0.3.0",
+    "maintainer": "Dmitriy Olshevskiy <olshevskiy87@bk.ru>",
+    "license": "MIT",
+    "release_status": "testing",
+    "tags": [
+        "check",
+        "digit",
+        "identification",
+        "number"
+    ],
+    "resources": {
+        "repository": {
+            "url": "git://github.com/olshevskiy87/check_digits.git",
+            "web": "https://github.com/olshevskiy87/check_digits",
+            "type": "git"
+        }
+    },
+    "generated_by": "Dmitriy Olshevskiy",
+    "meta-spec": {
+        "version": "1.0.0",
+        "url": "http://pgxn.org/meta/spec.txt"
+    }
+}

@@ -1,5 +1,4 @@
 CREATE EXTENSION IF NOT EXISTS check_digits;
-NOTICE:  extension "check_digits" already exists, skipping
 -- should be true
 select check_digits_okpo('47296611');
  check_digits_okpo 

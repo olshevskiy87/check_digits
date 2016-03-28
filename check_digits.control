@@ -1,5 +1,5 @@
 # check_digits extension
 comment = 'functions to check various identification numbers'
-default_version = '1.0'
+default_version = '0.3.0'
 module_pathname = '$libdir/check_digits'
 relocatable = true
