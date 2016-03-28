@@ -14,7 +14,7 @@
     "provides": {
         "check_digits": {
             "file": "sql/check_digits--0.3.0.sql",
-            "docfile": "Readme.md",
+            "docfile": "README.md",
             "version": "0.3.0",
             "abstract": "Functions to check various identification numbers"
         }

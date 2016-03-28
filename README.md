@@ -26,21 +26,25 @@ Installation
 ------------
 
 Build with
+
 ```
 $ make
 ```
 
 To make the regression tests run
+
 ```
 $ make installcheck
 ```
 
 Install with
+
 ```
 $ sudo make install
 ```
 
 At last to create the extension type in psql
+
 ```
 $$ CREATE EXTENSION check_digits;
 ```
@@ -49,4 +53,4 @@ License
 -------
 
 Copyright (c) 2015 - 2016 Dmitriy Olshevskiy. MIT LICENSE.
-See LICENSE.md for details.
+See LICENSE for details.
