@@ -1,6 +1,6 @@
 *.o
 *.so
-*.swp
+*.sw[pno]
 *.zip
 /results
 /regression.diffs
