@@ -19,7 +19,3 @@ include $(PGXS)
 dist:
 	git archive --format zip --prefix=$(EXTENSION)-$(EXTVERSION)/ \
 		-o $(EXTENSION)-$(EXTVERSION).zip HEAD
-
-quantile.so: src/quantile.o
-
-src/quantile.o: src/quantile.c
