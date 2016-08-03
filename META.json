@@ -1,7 +1,7 @@
 {
     "name": "check_digits",
     "abstract": "Functions to check various identification numbers",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "maintainer": "Dmitriy Olshevskiy <olshevskiy87@bk.ru>",
     "license": "mit",
     "release_status": "testing",
@@ -13,9 +13,9 @@
     ],
     "provides": {
         "check_digits": {
-            "file": "sql/check_digits--0.3.0.sql",
+            "file": "sql/check_digits--0.3.1.sql",
             "docfile": "README.md",
-            "version": "0.3.0",
+            "version": "0.3.1",
             "abstract": "Functions to check various identification numbers"
         }
     },
