@@ -17,5 +17,5 @@ PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
 
 dist:
-	git archive --format zip --prefix=$(EXTENSION)-$(EXTVERSION)/ \
-		-o $(EXTENSION)-$(EXTVERSION).zip HEAD
+	zip -r "$(EXTENSION)-$(EXTVERSION).zip" . \
+		--exclude @.exclude.list

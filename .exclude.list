@@ -1,0 +1,9 @@
+.git/*
+.gitignore
+*.zip
+results/*
+regression.diffs/*
+regression.out/*
+*.o
+*.so
+*.sw[pno]
