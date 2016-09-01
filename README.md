@@ -1,6 +1,8 @@
 check digits
 ============
 
+[![PGXN version](https://badge.fury.io/pg/check_digits.svg)](http://pgxn.org/dist/check\_digits)
+
 Functions to check various identification numbers.
 
 Functions
@@ -53,4 +55,5 @@ License
 -------
 
 Copyright (c) 2015 - 2016 Dmitriy Olshevskiy. MIT LICENSE.
+
 See LICENSE for details.
