@@ -244,9 +244,6 @@ check_digits_ogrn(PG_FUNCTION_ARGS)
 Datum
 check_digits_snils(PG_FUNCTION_ARGS)
 {
-
-#define SNILS_MIN_VALUE 1001998
-
     unsigned long long  snils_num;
     text    *p_snils;
     char    *c_snils, *snils;
