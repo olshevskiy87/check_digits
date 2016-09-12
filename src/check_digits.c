@@ -20,22 +20,25 @@ PG_FUNCTION_INFO_V1(check_digits_ogrn);
 PG_FUNCTION_INFO_V1(check_digits_snils);
 
 char *
-check_array_of_digits(char* arr, uint8_t len)
+check_array_of_digits(char *arr, uint8_t len)
 {
-    uint8_t  i;
-    char    *ret = (char *) calloc(25, sizeof(char));
+	uint8_t		i;
+	char	   *ret = (char *) calloc(25, sizeof(char));
 
-    if (len == 0) {
-        return "zero length";
-    }
+	if (len == 0)
+	{
+		return "zero length";
+	}
 
-    for (i = 0; i < len; i++) {
-        if (!isdigit(arr[i])) {
-            sprintf(ret, "invalid symbol \"%c\"", arr[i]);
-            return ret;
-        }
-    }
-    return "";
+	for (i = 0; i < len; i++)
+	{
+		if (!isdigit(arr[i]))
+		{
+			sprintf(ret, "invalid symbol \"%c\"", arr[i]);
+			return ret;
+		}
+	}
+	return "";
 }
 
 /*
@@ -47,82 +50,95 @@ check_array_of_digits(char* arr, uint8_t len)
 Datum
 check_digits_inn(PG_FUNCTION_ARGS)
 {
-    text       *inn;
-    uint8_t     inn_len, i, i_inn[12];
-    char       *c_inn, *err_ret;
-    bool        is_correct = false;
-    uint16_t    mul_sum, rest;
+	text	   *inn;
+	uint8_t		inn_len,
+				i,
+				i_inn[12];
+	char	   *c_inn,
+			   *err_ret;
+	bool		is_correct = false;
+	uint16_t	mul_sum,
+				rest;
 
-    if (PG_ARGISNULL(0)) {
-        PG_RETURN_NULL();
-    }
+	if (PG_ARGISNULL(0))
+	{
+		PG_RETURN_NULL();
+	}
 
-    inn = PG_GETARG_TEXT_P(0);
-    inn_len = VARSIZE(inn) - VARHDRSZ;
-    if (inn_len != 10 && inn_len != 12) {
-        ereport(ERROR,
-                (errcode(ERRCODE_STRING_DATA_LENGTH_MISMATCH),
-                 errmsg("INN must contain 10 or 12 digits")));
-    }
-    c_inn = text_to_cstring(inn);
+	inn = PG_GETARG_TEXT_P(0);
+	inn_len = VARSIZE(inn) - VARHDRSZ;
+	if (inn_len != 10 && inn_len != 12)
+	{
+		ereport(ERROR,
+				(errcode(ERRCODE_STRING_DATA_LENGTH_MISMATCH),
+				 errmsg("INN must contain 10 or 12 digits")));
+	}
+	c_inn = text_to_cstring(inn);
 
-    err_ret = check_array_of_digits(c_inn, inn_len);
-    if (strlen(err_ret)) {
-        ereport(ERROR,
-                (errcode(ERRCODE_DATA_EXCEPTION),
-                 errmsg("%s", err_ret)));
-    }
-    for (i = 0; i < inn_len; i++) {
-        i_inn[i] = c_inn[i] - '0';
-    }
-    pfree(c_inn);
+	err_ret = check_array_of_digits(c_inn, inn_len);
+	if (strlen(err_ret))
+	{
+		ereport(ERROR,
+				(errcode(ERRCODE_DATA_EXCEPTION),
+				 errmsg("%s", err_ret)));
+	}
+	for (i = 0; i < inn_len; i++)
+	{
+		i_inn[i] = c_inn[i] - '0';
+	}
+	pfree(c_inn);
 
-    /* is physical person */
-    if (inn_len == 10) {
-        mul_sum = i_inn[0]*2 + i_inn[1]*4 + i_inn[2]*10
-                + i_inn[3]*3 + i_inn[4]*5 + i_inn[5]*9
-                + i_inn[6]*4 + i_inn[7]*6 + i_inn[8]*8;
-        elog(DEBUG1, "check_digits_inn: mul_sum [%d]", mul_sum);
-        rest = mul_sum % 11;
-        if (rest > 9) {
-            rest = mul_sum % 10;
-        }
-        elog(DEBUG1, "check_digits_inn: rest [%d]", rest);
-        is_correct = (i_inn[9] == rest);
+	/* is physical person */
+	if (inn_len == 10)
+	{
+		mul_sum = i_inn[0] * 2 + i_inn[1] * 4 + i_inn[2] * 10
+			+ i_inn[3] * 3 + i_inn[4] * 5 + i_inn[5] * 9
+			+ i_inn[6] * 4 + i_inn[7] * 6 + i_inn[8] * 8;
+		elog(DEBUG1, "check_digits_inn: mul_sum [%d]", mul_sum);
+		rest = mul_sum % 11;
+		if (rest > 9)
+		{
+			rest = mul_sum % 10;
+		}
+		elog(DEBUG1, "check_digits_inn: rest [%d]", rest);
+		is_correct = (i_inn[9] == rest);
 
-    /* is juridical person */
-    } else {
-        /* check digit (1) */
-        mul_sum = i_inn[0]*7 + i_inn[1]*2 + i_inn[2]*4
-                + i_inn[3]*10 + i_inn[4]*3 + i_inn[5]*5
-                + i_inn[6]*9 + i_inn[7]*4 + i_inn[8]*6
-                + i_inn[9]*8;
-        elog(DEBUG1, "check_digits_inn: check digit (1). "
-                     "mul_sum [%d]", mul_sum);
-        rest = mul_sum % 11;
-        if (rest > 9) {
-            rest = mul_sum % 10;
-        }
-        elog(DEBUG1, "check_digits_inn: check digit (1). "
-                     "rest [%d]", rest);
-        if (i_inn[10] == rest) {
-            /* check digit (2) */
-            mul_sum = i_inn[0]*3 + i_inn[1]*7 + i_inn[2]*2
-                    + i_inn[3]*4 + i_inn[4]*10 + i_inn[5]*3
-                    + i_inn[6]*5 + i_inn[7]*9 + i_inn[8]*4
-                    + i_inn[9]*6 + i_inn[10]*8;
-            elog(DEBUG1, "check_digits_inn: check digit (2). "
-                         "mul_sum [%d]", mul_sum);
-            rest = mul_sum % 11;
-            if (rest > 9) {
-                rest = mul_sum % 10;
-            }
-            elog(DEBUG1, "check_digits_inn: check digit (2). "
-                         "rest [%d]", rest);
-            is_correct = (i_inn[11] == rest);
-        }
-    }
-    PG_RETURN_BOOL(is_correct);
+	}
+	/* is juridical person */
+	else
+	{
+		/* check digit (1) */
+		mul_sum = i_inn[0] * 7 + i_inn[1] * 2 + i_inn[2] * 4
+			+ i_inn[3] * 10 + i_inn[4] * 3 + i_inn[5] * 5
+			+ i_inn[6] * 9 + i_inn[7] * 4 + i_inn[8] * 6
+			+ i_inn[9] * 8;
+		elog(DEBUG1, "check_digits_inn: check digit (1). mul_sum [%d]",
+			 mul_sum);
+		rest = mul_sum % 11;
+		if (rest > 9)
+		{
+			rest = mul_sum % 10;
+		}
+		elog(DEBUG1, "check_digits_inn: check digit (1). rest [%d]", rest);
+		if (i_inn[10] == rest)
+		{
+			/* check digit (2) */
+			mul_sum = i_inn[0] * 3 + i_inn[1] * 7 + i_inn[2] * 2
+				+ i_inn[3] * 4 + i_inn[4] * 10 + i_inn[5] * 3
+				+ i_inn[6] * 5 + i_inn[7] * 9 + i_inn[8] * 4
+				+ i_inn[9] * 6 + i_inn[10] * 8;
+			elog(DEBUG1, "check_digits_inn: check digit (2). mul_sum [%d]",
+				 mul_sum);
+			rest = mul_sum % 11;
+			if (rest > 9)
+			{
+				rest = mul_sum % 10;
+			}
+			elog(DEBUG1, "check_digits_inn: check digit (2). rest [%d]", rest);
+			is_correct = (i_inn[11] == rest);
+		}
+	}
+	PG_RETURN_BOOL(is_correct);
 }
 
 /*
@@ -134,53 +150,65 @@ check_digits_inn(PG_FUNCTION_ARGS)
 Datum
 check_digits_okpo(PG_FUNCTION_ARGS)
 {
-    text       *okpo;
-    char       *c_okpo, *err_ret;
-    uint8_t     okpo_len, i, penult_index;
-    uint8_t     i_okpo[10];
-    uint16_t    mul_sum = 0, rest;
+	text	   *okpo;
+	char	   *c_okpo,
+			   *err_ret;
+	uint8_t		okpo_len,
+				i,
+				penult_index;
+	uint8_t		i_okpo[10];
+	uint16_t	mul_sum = 0,
+				rest;
 
-    if (PG_ARGISNULL(0)) {
-        PG_RETURN_NULL();
-    }
+	if (PG_ARGISNULL(0))
+	{
+		PG_RETURN_NULL();
+	}
 
-    okpo = PG_GETARG_TEXT_P(0);
-    okpo_len = VARSIZE(okpo) - VARHDRSZ;
-    if (okpo_len != 8 && okpo_len != 10) {
-        ereport(ERROR,
-                (errcode(ERRCODE_STRING_DATA_LENGTH_MISMATCH),
-                 errmsg("OKPO must contain 8 or 10 digits")));
-    }
-    c_okpo = text_to_cstring(okpo);
+	okpo = PG_GETARG_TEXT_P(0);
+	okpo_len = VARSIZE(okpo) - VARHDRSZ;
+	if (okpo_len != 8 && okpo_len != 10)
+	{
+		ereport(ERROR,
+				(errcode(ERRCODE_STRING_DATA_LENGTH_MISMATCH),
+				 errmsg("OKPO must contain 8 or 10 digits")));
+	}
+	c_okpo = text_to_cstring(okpo);
 
-    err_ret = check_array_of_digits(c_okpo, okpo_len);
-    if (strlen(err_ret)) {
-        ereport(ERROR,
-                (errcode(ERRCODE_DATA_EXCEPTION),
-                 errmsg("%s", err_ret)));
-    }
-    for (i = 0; i < okpo_len; i++) {
-        i_okpo[i] = c_okpo[i] - '0';
-    }
-    pfree(c_okpo);
+	err_ret = check_array_of_digits(c_okpo, okpo_len);
+	if (strlen(err_ret))
+	{
+		ereport(ERROR,
+				(errcode(ERRCODE_DATA_EXCEPTION),
+				 errmsg("%s", err_ret)));
+	}
+	for (i = 0; i < okpo_len; i++)
+	{
+		i_okpo[i] = c_okpo[i] - '0';
+	}
+	pfree(c_okpo);
 
-    penult_index = okpo_len - 1;
-    for (i = 0; i < penult_index; i++) {
-        mul_sum += i_okpo[i] * (i + 1);
-    }
-    rest = mul_sum % 11;
-    if (rest > 9) {
-        mul_sum = 0;
-        for (i = 0; i < penult_index; i++) {
-            mul_sum += i_okpo[i] * (i + 3);
-        }
-        rest = mul_sum % 11;
-        if (rest > 9) {
-            rest = 0;
-        }
-    }
+	penult_index = okpo_len - 1;
+	for (i = 0; i < penult_index; i++)
+	{
+		mul_sum += i_okpo[i] * (i + 1);
+	}
+	rest = mul_sum % 11;
+	if (rest > 9)
+	{
+		mul_sum = 0;
+		for (i = 0; i < penult_index; i++)
+		{
+			mul_sum += i_okpo[i] * (i + 3);
+		}
+		rest = mul_sum % 11;
+		if (rest > 9)
+		{
+			rest = 0;
+		}
+	}
 
-    PG_RETURN_BOOL((i_okpo[penult_index] == rest));
+	PG_RETURN_BOOL((i_okpo[penult_index] == rest));
 }
 
 /*
@@ -192,53 +220,59 @@ check_digits_okpo(PG_FUNCTION_ARGS)
 Datum
 check_digits_ogrn(PG_FUNCTION_ARGS)
 {
-    /* ogrn number without last digit */
-    unsigned long long  ogrn_num;
-    text       *ogrn;
-    char       *c_ogrn, *err_ret;
-    uint8_t     len, last_digit;
-    uint16_t    rest;
+	/* ogrn number without last digit */
+	unsigned long long ogrn_num;
+	text	   *ogrn;
+	char	   *c_ogrn,
+			   *err_ret;
+	uint8_t		len,
+				last_digit;
+	uint16_t	rest;
 
-    if (PG_ARGISNULL(0)) {
-        PG_RETURN_NULL();
-    }
+	if (PG_ARGISNULL(0))
+	{
+		PG_RETURN_NULL();
+	}
 
-    ogrn = PG_GETARG_TEXT_P(0);
-    len = VARSIZE(ogrn) - VARHDRSZ;
-    elog(DEBUG1, "check_digits_ogrn: length [%d]", len);
+	ogrn = PG_GETARG_TEXT_P(0);
+	len = VARSIZE(ogrn) - VARHDRSZ;
+	elog(DEBUG1, "check_digits_ogrn: length [%d]", len);
 
-    if (len != 13 && len != 15) {
-        ereport(ERROR,
-                (errcode(ERRCODE_STRING_DATA_LENGTH_MISMATCH),
-                 errmsg("OGRN must contain 13 or 15 digits")));
-    }
-    c_ogrn = text_to_cstring(ogrn);
+	if (len != 13 && len != 15)
+	{
+		ereport(ERROR,
+				(errcode(ERRCODE_STRING_DATA_LENGTH_MISMATCH),
+				 errmsg("OGRN must contain 13 or 15 digits")));
+	}
+	c_ogrn = text_to_cstring(ogrn);
 
-    err_ret = check_array_of_digits(c_ogrn, len);
-    if (strlen(err_ret)) {
-        ereport(ERROR,
-                (errcode(ERRCODE_DATA_EXCEPTION),
-                 errmsg("%s", err_ret)));
-    }
+	err_ret = check_array_of_digits(c_ogrn, len);
+	if (strlen(err_ret))
+	{
+		ereport(ERROR,
+				(errcode(ERRCODE_DATA_EXCEPTION),
+				 errmsg("%s", err_ret)));
+	}
 
-    last_digit = c_ogrn[len - 1] - '0';
-    elog(DEBUG1, "check_digits_ogrn: last digit [%d]", last_digit);
+	last_digit = c_ogrn[len - 1] - '0';
+	elog(DEBUG1, "check_digits_ogrn: last digit [%d]", last_digit);
 
-    /* remove last digit before cast to LL */
-    c_ogrn[len - 1] = '\0';
+	/* remove last digit before cast to LL */
+	c_ogrn[len - 1] = '\0';
 
-    sscanf(c_ogrn, "%lld", &ogrn_num);
-    elog(DEBUG1, "check_digits_ogrn: ogrn num [%lld]", ogrn_num);
+	sscanf(c_ogrn, "%lld", &ogrn_num);
+	elog(DEBUG1, "check_digits_ogrn: ogrn num [%lld]", ogrn_num);
 
-    pfree(c_ogrn);
+	pfree(c_ogrn);
 
-    rest = ogrn_num % (len - 2);
-    if (rest > 9) {
-        rest = rest % 10;
-    }
-    elog(DEBUG1, "check_digits_ogrn: rest [%d]", rest);
+	rest = ogrn_num % (len - 2);
+	if (rest > 9)
+	{
+		rest = rest % 10;
+	}
+	elog(DEBUG1, "check_digits_ogrn: rest [%d]", rest);
 
-    PG_RETURN_BOOL((last_digit == rest));
+	PG_RETURN_BOOL((last_digit == rest));
 }
 
 /*
@@ -247,70 +281,87 @@ check_digits_ogrn(PG_FUNCTION_ARGS)
 Datum
 check_digits_snils(PG_FUNCTION_ARGS)
 {
-    unsigned long long  snils_num;
-    text    *p_snils;
-    char    *c_snils, *snils;
-    uint8_t  len, new_len, i, weight, ch_num;
-    uint16_t mul_sum = 0, rest;
-    int      i_snils[11];
+	unsigned long long snils_num;
+	text	   *p_snils;
+	char	   *c_snils,
+			   *snils;
+	uint8_t		len,
+				new_len,
+				i,
+				weight,
+				ch_num;
+	uint16_t	mul_sum = 0,
+				rest;
+	int			i_snils[11];
 
-    if (PG_ARGISNULL(0)) {
-        PG_RETURN_NULL();
-    }
+	if (PG_ARGISNULL(0))
+	{
+		PG_RETURN_NULL();
+	}
 
-    p_snils = PG_GETARG_TEXT_P(0);
-    len = VARSIZE(p_snils) - VARHDRSZ;
+	p_snils = PG_GETARG_TEXT_P(0);
+	len = VARSIZE(p_snils) - VARHDRSZ;
 
-    snils = (char *) calloc(len, sizeof(char));
+	snils = (char *) calloc(len, sizeof(char));
 
-    c_snils = text_to_cstring(p_snils);
-    pfree(p_snils);
-    new_len = 0;
-    for (i = 0; i < len; i++) {
-        if (!isdigit(c_snils[i])) {
-            continue;
-        }
-        snils[new_len] = c_snils[i];
-        new_len++;
-    }
-    if (new_len != 11) {
-        ereport(ERROR,
-                (errcode(ERRCODE_STRING_DATA_LENGTH_MISMATCH),
-                 errmsg("SNILS must contain 11 digits")));
-    }
+	c_snils = text_to_cstring(p_snils);
+	pfree(p_snils);
+	new_len = 0;
+	for (i = 0; i < len; i++)
+	{
+		if (!isdigit(c_snils[i]))
+		{
+			continue;
+		}
+		snils[new_len] = c_snils[i];
+		new_len++;
+	}
+	if (new_len != 11)
+	{
+		ereport(ERROR,
+				(errcode(ERRCODE_STRING_DATA_LENGTH_MISMATCH),
+				 errmsg("SNILS must contain 11 digits")));
+	}
 
-    sscanf(snils, "%lld", &snils_num);
-    elog(DEBUG1, "check_digits_snils: snils num [%lld]", snils_num);
+	sscanf(snils, "%lld", &snils_num);
+	elog(DEBUG1, "check_digits_snils: snils num [%lld]", snils_num);
 
-    if (snils_num <= SNILS_MIN_VALUE) {
-        ereport(ERROR,
-                (errcode(ERRCODE_DATA_EXCEPTION),
-                 errmsg("SNILS must be more than %d", SNILS_MIN_VALUE)));
-    }
+	if (snils_num <= SNILS_MIN_VALUE)
+	{
+		ereport(ERROR,
+				(errcode(ERRCODE_DATA_EXCEPTION),
+				 errmsg("SNILS must be more than %d", SNILS_MIN_VALUE)));
+	}
 
-    for (i = 0; i < new_len; i++) {
-        i_snils[i] = snils[i] - '0';
-    }
-    free(snils);
+	for (i = 0; i < new_len; i++)
+	{
+		i_snils[i] = snils[i] - '0';
+	}
+	free(snils);
 
-    ch_num = i_snils[new_len - 2] * 10 + i_snils[new_len - 1];
-    elog(DEBUG1, "check_digits_snils: check num [%d]", ch_num);
+	ch_num = i_snils[new_len - 2] * 10 + i_snils[new_len - 1];
+	elog(DEBUG1, "check_digits_snils: check num [%d]", ch_num);
 
-    for (weight = 9, i = 0; weight > 0; weight--) {
-        mul_sum += i_snils[i++] * weight;
-    }
-    elog(DEBUG1, "check_digits_snils: mul_sum [%d]", mul_sum);
+	for (weight = 9, i = 0; weight > 0; weight--)
+	{
+		mul_sum += i_snils[i++] * weight;
+	}
+	elog(DEBUG1, "check_digits_snils: mul_sum [%d]", mul_sum);
 
-    rest = mul_sum;
-    if (rest == 100 || rest == 101) {
-        rest = 0;
-    } else if (rest > 101) {
-        rest = mul_sum % 101;
-        if (rest == 100 || rest == 101) {
-            rest = 0;
-        }
-    }
-    elog(DEBUG1, "check_digits_snils: rest [%d]", rest);
+	rest = mul_sum;
+	if (rest == 100 || rest == 101)
+	{
+		rest = 0;
+	}
+	else if (rest > 101)
+	{
+		rest = mul_sum % 101;
+		if (rest == 100 || rest == 101)
+		{
+			rest = 0;
+		}
+	}
+	elog(DEBUG1, "check_digits_snils: rest [%d]", rest);
 
-    PG_RETURN_BOOL((rest == ch_num));
+	PG_RETURN_BOOL((rest == ch_num));
 }
