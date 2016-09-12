@@ -77,7 +77,7 @@ check_digits_inn(PG_FUNCTION_ARGS)
     }
     pfree(c_inn);
 
-    // is physical person
+    /* is physical person */
     if (inn_len == 10) {
         mul_sum = i_inn[0]*2 + i_inn[1]*4 + i_inn[2]*10
                 + i_inn[3]*3 + i_inn[4]*5 + i_inn[5]*9
@@ -90,9 +90,9 @@ check_digits_inn(PG_FUNCTION_ARGS)
         elog(DEBUG1, "check_digits_inn: rest [%d]", rest);
         is_correct = (i_inn[9] == rest);
 
-    // is juridical person
+    /* is juridical person */
     } else {
-        // check digit (1)
+        /* check digit (1) */
         mul_sum = i_inn[0]*7 + i_inn[1]*2 + i_inn[2]*4
                 + i_inn[3]*10 + i_inn[4]*3 + i_inn[5]*5
                 + i_inn[6]*9 + i_inn[7]*4 + i_inn[8]*6
@@ -106,7 +106,7 @@ check_digits_inn(PG_FUNCTION_ARGS)
         elog(DEBUG1, "check_digits_inn: check digit (1). "
                      "rest [%d]", rest);
         if (i_inn[10] == rest) {
-            // check digit (2)
+            /* check digit (2) */
             mul_sum = i_inn[0]*3 + i_inn[1]*7 + i_inn[2]*2
                     + i_inn[3]*4 + i_inn[4]*10 + i_inn[5]*3
                     + i_inn[6]*5 + i_inn[7]*9 + i_inn[8]*4
@@ -192,7 +192,8 @@ check_digits_okpo(PG_FUNCTION_ARGS)
 Datum
 check_digits_ogrn(PG_FUNCTION_ARGS)
 {
-    unsigned long long  ogrn_num;   // ogrn number without last digit
+    /* ogrn number without last digit */
+    unsigned long long  ogrn_num;
     text       *ogrn;
     char       *c_ogrn, *err_ret;
     uint8_t     len, last_digit;
@@ -223,7 +224,9 @@ check_digits_ogrn(PG_FUNCTION_ARGS)
     last_digit = c_ogrn[len - 1] - '0';
     elog(DEBUG1, "check_digits_ogrn: last digit [%d]", last_digit);
 
-    c_ogrn[len - 1] = '\0';    // remove last digit before cast to LL
+    /* remove last digit before cast to LL */
+    c_ogrn[len - 1] = '\0';
+
     sscanf(c_ogrn, "%lld", &ogrn_num);
     elog(DEBUG1, "check_digits_ogrn: ogrn num [%lld]", ogrn_num);
 
