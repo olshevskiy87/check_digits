@@ -18,6 +18,7 @@ PG_FUNCTION_INFO_V1(check_digits_inn);
 PG_FUNCTION_INFO_V1(check_digits_okpo);
 PG_FUNCTION_INFO_V1(check_digits_ogrn);
 PG_FUNCTION_INFO_V1(check_digits_snils);
+PG_FUNCTION_INFO_V1(check_digits_isbn);
 
 char *
 check_array_of_digits(char *arr, uint8_t len)
@@ -364,4 +365,102 @@ check_digits_snils(PG_FUNCTION_ARGS)
 	elog(DEBUG1, "check_digits_snils: rest [%d]", rest);
 
 	PG_RETURN_BOOL((rest == ch_num));
+}
+
+/*
+ * Check International Standard Book Number (ISBN-10 and ISBN-13)
+ */
+Datum
+check_digits_isbn(PG_FUNCTION_ARGS)
+{
+	text	   *p_isbn;
+	char	   *c_isbn,
+			   *isbn,
+				isbn_symbol;
+	uint8_t		len,
+				new_len,
+				i,
+				weight;
+	uint16_t	mul_sum = 0,
+				rest;
+	int			i_isbn[13];
+	bool		is_x_char,
+				is_isbn_10;
+
+	if (PG_ARGISNULL(0))
+	{
+		PG_RETURN_NULL();
+	}
+
+	p_isbn = PG_GETARG_TEXT_P(0);
+	len = VARSIZE(p_isbn) - VARHDRSZ;
+
+	isbn = (char *) calloc(len, sizeof(char));
+
+	c_isbn = text_to_cstring(p_isbn);
+	pfree(p_isbn);
+	new_len = 0;
+	is_x_char = false;
+	for (i = 0; i < len; i++)
+	{
+		isbn_symbol = c_isbn[i];
+
+		if (isdigit(isbn_symbol))
+		{
+			isbn[new_len] = c_isbn[i];
+		}
+		else if (isbn_symbol == 'x' || isbn_symbol == 'X')
+		{
+			isbn[new_len] = 'x';
+			is_x_char = true;
+		}
+		else
+		{
+			continue;
+		}
+		new_len++;
+	}
+	if (new_len != 10 && new_len != 13)
+	{
+		ereport(ERROR,
+				(errcode(ERRCODE_STRING_DATA_LENGTH_MISMATCH),
+				 errmsg("ISBN must contain 10 or 13 digits")));
+	}
+
+	elog(DEBUG1, "check_digits_isbn: parsed isbn number [%s]", isbn);
+
+	for (i = 0; i < new_len; i++)
+	{
+		i_isbn[i] = (isbn[i] != 'x' ? isbn[i] - '0' : 10);
+	}
+	free(isbn);
+
+	is_isbn_10 = (new_len == 10);
+	if (is_isbn_10)
+	{
+		elog(DEBUG1, "ISBN-10 detected");
+		for (weight = 10, i = 0; weight > 0; weight--, i++)
+		{
+			mul_sum += i_isbn[i] * weight;
+		}
+	}
+	else
+	{
+		elog(DEBUG1, "ISBN-13 detected");
+		if (is_x_char) {
+			ereport(ERROR,
+					(errcode(ERRCODE_DATA_EXCEPTION),
+					 errmsg("ISBN-13 could not contain symbol \"x\"")));
+		}
+		for (i = 0; i < 13; i++)
+		{
+			mul_sum += i_isbn[i] * (i % 2 ? 3 : 1);
+		}
+	}
+	elog(DEBUG1, "check_digits_isbn: mul_sum [%d]", mul_sum);
+
+	rest = mul_sum % (is_isbn_10 ? 11 : 10);
+	elog(DEBUG1, "check_digits_isbn: rest [%d]", rest);
+
+	PG_RETURN_BOOL((rest == 0));
 }

@@ -1,0 +1,34 @@
+CREATE EXTENSION IF NOT EXISTS check_digits;
+NOTICE:  extension "check_digits" already exists, skipping
+-- should be true
+select check_digits_isbn('1451627289');
+ check_digits_isbn 
+-------------------
+ t
+(1 row)
+
+select check_digits_isbn('978-1-934356-98-2');
+ check_digits_isbn 
+-------------------
+ t
+(1 row)
+
+-- should be false
+select check_digits_isbn('5-93286-093-8');
+ check_digits_isbn 
+-------------------
+ f
+(1 row)
+
+select check_digits_isbn('5-19-036976-X');
+ check_digits_isbn 
+-------------------
+ f
+(1 row)
+
+-- should fail with error
+-- by length
+select check_digits_isbn('978-5-271-1611-8');
+ERROR:  ISBN must contain 10 or 13 digits
+select check_digits_isbn('978-0-752860436-5');
+ERROR:  ISBN must contain 10 or 13 digits

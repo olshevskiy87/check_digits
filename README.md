@@ -24,6 +24,10 @@ Check Primary State Registration Number ([OGRN](https://goo.gl/Abd9oc))
 
 Check Insurance Number of Individual Ledger Account ([SNILS](https://goo.gl/NxeFKV))
 
+* `check_digits_isbn(isbn text)`
+
+Check [International Standard Book Number](https://goo.gl/0LINxR) (ISBN-10 and ISBN-13)
+
 Installation
 ------------
 
