@@ -4,7 +4,7 @@
     "version": "0.3.1",
     "maintainer": "Dmitriy Olshevskiy <olshevskiy87@bk.ru>",
     "license": "mit",
-    "release_status": "testing",
+    "release_status": "stable",
     "tags": [
         "check",
         "digit",
