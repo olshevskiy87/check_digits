@@ -21,8 +21,8 @@
     },
     "resources": {
         "repository": {
-            "url": "https://bitbucket.org/olshevskiy87/check_digits.git",
-            "web": "https://bitbucket.org/olshevskiy87/check_digits",
+            "url": "https://github.com/olshevskiy87/check_digits.git",
+            "web": "https://github.com/olshevskiy87/check_digits",
             "type": "git"
         }
     },
