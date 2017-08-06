@@ -14,15 +14,15 @@ Checks russian Individual Taxpayer Number ([INN](https://goo.gl/dK7BZs))
 
 * `check_digits_okpo(okpo text)`
 
-Checks All-Russian Classifier of Enterprises and Organizations ([OKPO](https://goo.gl/gWldnP))
+Checks All-Russian Classifier of Enterprises and Organizations ([OKPO](https://goo.gl/gWldnP), ru)
 
 * `check_digits_ogrn(ogrn text)`
 
-Check Primary State Registration Number ([OGRN](https://goo.gl/Abd9oc))
+Check Primary State Registration Number ([OGRN](https://goo.gl/Abd9oc), ru)
 
 * `check_digits_snils(snils text)`
 
-Check Insurance Number of Individual Ledger Account ([SNILS](https://goo.gl/NxeFKV))
+Check Insurance Number of Individual Ledger Account ([SNILS](https://goo.gl/NxeFKV), ru)
 
 * `check_digits_isbn(isbn text)`
 
