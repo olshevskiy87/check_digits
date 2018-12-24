@@ -1,7 +1,7 @@
 {
     "name": "check_digits",
     "abstract": "Functions to check various identification numbers",
-    "version": "0.3.2",
+    "version": "0.3.3",
     "maintainer": "Dmitriy Olshevskiy <olshevskiy87@bk.ru>",
     "license": "mit",
     "release_status": "stable",
